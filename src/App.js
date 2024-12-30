@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Stage, Layer, Line, Circle, Image as KonvaImage } from 'react-konva';
 import { Brush, Clear, Save, FileCopy, Image as ImageIcon, RadioButtonUnchecked } from '@mui/icons-material';
 import './App.css';
@@ -11,6 +11,8 @@ const App = () => {
   const [color] = useState('#000000');
   const [stageWidth, setStageWidth] = useState(window.innerWidth);
   const [stageHeight, setStageHeight] = useState(window.innerHeight);
+
+  const stageRef = useRef(null); // Create ref for the Stage component
 
   useEffect(() => {
     const handleResize = () => {
@@ -95,13 +97,37 @@ const App = () => {
   };
 
   const saveCanvasAsImage = () => {
-    const stage = document.querySelector('canvas');
-    const dataUrl = stage.toDataURL();
+    if (!image || !stageRef.current) return;
+  
+    const stage = stageRef.current;
+    
+    // Get the stage dimensions
+    const width = stage.width();
+    const height = stage.height();
+  
+    // Create a new canvas with the correct dimensions
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    
+    const context = canvas.getContext('2d');
+    
+    // Draw the current stage on the new canvas
+    const dataUrl = stage.toDataURL({
+      pixelRatio: 1,  // Do not adjust pixel ratio here
+      x: 0,           // Optional, offset if you have specific areas to crop
+      y: 0,
+      width: width,
+      height: height,
+    });
+  
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = 'drawing.png';
     link.click();
   };
+  
+  
 
   const copyToClipboard = () => {
     const stage = document.querySelector('canvas');
@@ -118,7 +144,7 @@ const App = () => {
   return (
     <div className="container-fluid">
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a className="navbar-brand px-5" href="/">Runescape Board <br/> Updater</a>
+        <a className="navbar-brand px-5" href="/">Runescape Board <br /> Updater</a>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -174,11 +200,12 @@ const App = () => {
       </nav>
       <div className="drawing-container">
         <Stage
-          width={stageWidth}
-          height={stageHeight}
+          width={image ? image.width : window.innerWidth}
+          height={image ? image.height : window.innerHeight}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
+          ref={stageRef}  // Attach the ref to the Stage
         >
           <Layer>
             {image && <KonvaImage image={image} />}
@@ -207,7 +234,6 @@ const App = () => {
               );
             })}
           </Layer>
-
         </Stage>
       </div>
     </div>
