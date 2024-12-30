@@ -166,7 +166,7 @@ const App = () => {
               className={`nav-link btn btn-link ${tool === 'circle' ? 'selected' : ''}`}
               onClick={() => handleToolChange('circle')}
             >
-              <RadioButtonUnchecked /> Add Circle
+              <RadioButtonUnchecked /> Circle
             </button>
           </li>
           </ul>        
