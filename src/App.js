@@ -9,15 +9,13 @@ const App = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [image, setImage] = useState(null);
   const [color] = useState('#000000');
-  const [setStageWidth] = useState(window.innerWidth);
-  const [setStageHeight] = useState(window.innerHeight);
-
+  
   const stageRef = useRef(null); // Create ref for the Stage component
 
   useEffect(() => {
     const handleResize = () => {
-      setStageWidth(window.innerWidth);
-      setStageHeight(window.innerHeight);
+      // You can remove the state updates for stageWidth and stageHeight
+      // and let the Stage component automatically resize on window resize
     };
     window.addEventListener('resize', handleResize);
     return () => {
@@ -82,7 +80,6 @@ const App = () => {
     setIsDrawing(false);
   };
 
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -90,8 +87,6 @@ const App = () => {
       img.src = URL.createObjectURL(file);
       img.onload = () => {
         setImage(img);
-        setStageWidth(img.width);
-        setStageHeight(img.height);
       };
     }
   };
@@ -110,9 +105,6 @@ const App = () => {
     canvas.width = width;
     canvas.height = height;
     
-    // const context = canvas.getContext('2d');
-    
-    // Draw the current stage on the new canvas
     const dataUrl = stage.toDataURL({
       pixelRatio: 1,  // Do not adjust pixel ratio here
       x: 0,           // Optional, offset if you have specific areas to crop
@@ -127,8 +119,6 @@ const App = () => {
     link.click();
   };
   
-  
-
   const copyToClipboard = () => {
     const stage = document.querySelector('canvas');
     const dataUrl = stage.toDataURL('image/png');
