@@ -9,8 +9,8 @@ const App = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [image, setImage] = useState(null);
   const [color] = useState('#000000');
-  const [stageWidth, setStageWidth] = useState(window.innerWidth);
-  const [stageHeight, setStageHeight] = useState(window.innerHeight);
+  const [setStageWidth] = useState(window.innerWidth);
+  const [setStageHeight] = useState(window.innerHeight);
 
   const stageRef = useRef(null); // Create ref for the Stage component
 
@@ -110,7 +110,7 @@ const App = () => {
     canvas.width = width;
     canvas.height = height;
     
-    const context = canvas.getContext('2d');
+    // const context = canvas.getContext('2d');
     
     // Draw the current stage on the new canvas
     const dataUrl = stage.toDataURL({
