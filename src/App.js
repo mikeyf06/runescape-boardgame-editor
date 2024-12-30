@@ -118,7 +118,7 @@ const App = () => {
   return (
     <div className="container-fluid">
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a className="navbar-brand px-5" href="#">Runescape Board <br/> Updater</a>
+        <a className="navbar-brand px-5" href="/">Runescape Board <br/> Updater</a>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -136,33 +136,39 @@ const App = () => {
               onChange={handleImageUpload}
             />
           </form>
-            <li className="nav-item">
-              <a className="nav-link" href="#" onClick={saveCanvasAsImage}>
-                <Save /> Save
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#" onClick={copyToClipboard}>
-                <FileCopy /> Copy
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#" onClick={() => setLines([])}>
-                <Clear /> Clear
-              </a>
-            </li>            
+          <li className="nav-item">
+            <button className="nav-link btn btn-link" onClick={saveCanvasAsImage}>
+              <Save /> Save
+            </button>
+          </li>
+          <li className="nav-item">
+            <button className="nav-link btn btn-link" onClick={copyToClipboard}>
+              <FileCopy /> Copy
+            </button>
+          </li>
+          <li className="nav-item">
+            <button className="nav-link btn btn-link" onClick={() => setLines([])}>
+              <Clear /> Clear
+            </button>
+          </li>        
           </ul> 
           <ul className="navbar-nav ms-auto px-5">
-            <li className="nav-item">
-              <a className={`nav-link ${tool === 'line' ? 'selected' : ''}`} href="#" onClick={() => handleToolChange('line')}>
-                <Brush /> Line
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className={`nav-link ${tool === 'circle' ? 'selected' : ''}`} href="#" onClick={() => handleToolChange('circle')}>
-                <RadioButtonUnchecked /> Add Circle
-              </a>
-            </li>
+          <li className="nav-item">
+            <button
+              className={`nav-link btn btn-link ${tool === 'line' ? 'selected' : ''}`}
+              onClick={() => handleToolChange('line')}
+            >
+              <Brush /> Line
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              className={`nav-link btn btn-link ${tool === 'circle' ? 'selected' : ''}`}
+              onClick={() => handleToolChange('circle')}
+            >
+              <RadioButtonUnchecked /> Add Circle
+            </button>
+          </li>
           </ul>        
         </div>
       </nav>
@@ -193,7 +199,7 @@ const App = () => {
                   key={index}
                   points={line.points}
                   stroke={line.color}
-                  strokeWidth={8} // Fixed stroke width for lines
+                  strokeWidth={8}
                   tension={0.5}
                   lineCap="round"
                   lineJoin="round"
