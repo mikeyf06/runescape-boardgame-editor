@@ -7,8 +7,6 @@ This tool was created to quickly mark up a game board for RuneScape players. It 
 
 Very early and quick implementation, planning on iterating on this in the future.
 
-
-
 # Notes:
 
 Web is the best platform for this currently, this is not mobile friendly at all yet. Those updates will be coming soon.
