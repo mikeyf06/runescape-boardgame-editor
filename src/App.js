@@ -702,7 +702,7 @@ const App = () => {
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: sidebarOpen ? 'none' : '0 2px 8px rgba(0,0,0,0.3)',
-              transition: 'left 0.3s ease',
+              transition: 'left ease',
             }}
           >
             {sidebarOpen ? <ChevronLeft style={{ color: '#dc2626' }} /> : <ChevronRight style={{ color: '#dc2626' }} />}
