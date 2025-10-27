@@ -267,18 +267,18 @@ const App = () => {
         <div className="d-flex align-items-center">
           <label htmlFor="icon-button-file" className="btn btn-outline-light me-2" style={{ minWidth: 'auto' }}>
             <ImageIcon /> <span className="d-none d-md-inline">Upload</span>
-          </label> 
-          <input
-            accept="image/*"
-            style={{ display: 'none' }}
-            id="icon-button-file"
-            type="file"
-            onChange={handleImageUpload}
-          />
+            </label> 
+            <input
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="icon-button-file"
+              type="file"
+              onChange={handleImageUpload}
+            />
         </div>
       </nav>
       
-      <div style={{ display: 'flex', height: 'calc(100vh - 56px)', position: 'relative' }}>
+      <div style={{ display: 'flex', height: 'calc(100vh - 56px)', position: 'relative', overflow: 'visible' }}>
         {/* Sidebar with Toggle Button */}
         {isMobile ? (
           /* Mobile Sidebar - Full Overlay */
@@ -365,13 +365,13 @@ const App = () => {
                   />
                   <button className="btn btn-sm btn-outline-primary" onClick={saveCanvasAsImage}>
                     <Save /> Save Image
-                  </button>
+            </button>
                   <button className="btn btn-sm btn-outline-secondary" onClick={copyToClipboard}>
                     <FileCopy /> Copy to Clipboard
-                  </button>
+            </button>
                   <button className="btn btn-sm btn-outline-danger" onClick={() => setLines([])}>
                     <Clear /> Clear All
-                  </button>
+            </button>
                 </div>
               </div>
               
@@ -381,12 +381,12 @@ const App = () => {
               <div className="tool-tabs mb-3">
                 <h6 className="mb-2" style={{ color: '#dc2626' }}>Drawing Tools</h6>
                 <div className="btn-group w-100" role="group">
-                  <button
+            <button
                     type="button"
                     className={`btn btn-sm ${tool === 'line' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    onClick={() => handleToolChange('line')}
+              onClick={() => handleToolChange('line')}
                     title="Line Tool"
-                  >
+            >
                     <Brush />
             </button>
             <button
@@ -506,40 +506,16 @@ const App = () => {
             className="sidebar"
             style={{
               width: sidebarOpen ? '280px' : '0',
+              maxWidth: sidebarOpen ? '280px' : '0',
+              minWidth: sidebarOpen ? '280px' : '0',
               transition: 'width 0.3s ease',
               overflow: 'visible',
               backgroundColor: 'transparent',
               borderRight: 'none',
               position: 'relative',
+              flexShrink: 0,
             }}
           >
-            {/* Toggle Button - Only when sidebar is open */}
-            {sidebarOpen && (
-              <button
-                className="sidebar-toggle"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                style={{
-                  position: 'absolute',
-                  right: '-37px',
-                  top: '10px',
-                  zIndex: 1001,
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  borderLeft: 'none',
-                  backgroundColor: '#3a3a3a',
-                  borderRadius: '0 8px 8px 0',
-                  padding: '8px 6px',
-                  cursor: 'pointer',
-                  height: '40px',
-                  minWidth: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <ChevronLeft style={{ color: '#dc2626' }} />
-              </button>
-            )}
-            
             {sidebarOpen && (
               <div className="sidebar-content" style={{ 
                 padding: '20px', 
@@ -548,6 +524,9 @@ const App = () => {
                 backgroundColor: '#3a3a3a',
                 borderRadius: '0 12px 12px 0',
                 boxShadow: '2px 0 16px rgba(0,0,0,0.3)',
+                width: '280px',
+                maxWidth: '280px',
+                minWidth: '280px',
               }}>
                 {/* Main Actions */}
                 <div className="mb-3">
@@ -701,19 +680,20 @@ const App = () => {
           </div>
         )}
         
-        {/* Toggle Button - Only when sidebar is closed */}
-        {!sidebarOpen && !isMobile && (
+        {/* Desktop Toggle Button - Always visible */}
+        {!isMobile && (
           <button
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             style={{
-              position: 'absolute',
-              left: '0',
-              top: '10px',
-              zIndex: 1001,
-              border: '1px solid rgba(0,0,0,0.1)',
+              position: 'fixed',
+              left: sidebarOpen ? 'calc(280px - 1px)' : '0',
+              top: '90px',
+              zIndex: 10000,
+              border: sidebarOpen ? 'none' : '1px solid rgba(0,0,0,0.1)',
+              borderLeft: sidebarOpen ? '2px solid #3a3a3a' : '1px solid rgba(0,0,0,0.1)',
               backgroundColor: '#3a3a3a',
-              borderRadius: '0 8px 8px 0',
+              borderRadius: sidebarOpen ? '0 8px 8px 0' : '0 8px 8px 0',
               padding: '8px 6px',
               cursor: 'pointer',
               height: '40px',
@@ -721,11 +701,11 @@ const App = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              boxShadow: sidebarOpen ? 'none' : '0 2px 8px rgba(0,0,0,0.3)',
+              transition: 'left 0.3s ease',
             }}
           >
-            <ChevronRight style={{ color: '#dc2626' }} />
+            {sidebarOpen ? <ChevronLeft style={{ color: '#dc2626' }} /> : <ChevronRight style={{ color: '#dc2626' }} />}
           </button>
         )}
         
@@ -738,7 +718,7 @@ const App = () => {
               position: 'fixed',
               bottom: '20px',
               right: '20px',
-              zIndex: 1000,
+              zIndex: 9999,
               width: '60px',
               height: '60px',
               borderRadius: '50%',
@@ -761,7 +741,7 @@ const App = () => {
             }}
           >
             <Menu style={{ fontSize: '32px' }} />
-          </button>
+            </button>
         )}
         
         {/* Main Content */}
@@ -800,7 +780,7 @@ const App = () => {
                 <div className="step-text">Save or copy your work</div>
               </div>
             </div>
-          </div>
+        </div>
         )}
         <Stage
             width={stageSize.width}
