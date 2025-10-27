@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Stage, Layer, Line, Circle, Image as KonvaImage } from 'react-konva';
-import { Brush, Clear, Save, FileCopy, Image as ImageIcon, RadioButtonUnchecked, Close, Palette, Menu, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Brush, Clear, Save, FileCopy, Image as ImageIcon, RadioButtonUnchecked, Close, Palette, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import './App.css';
 
 const App = () => {
@@ -12,7 +12,7 @@ const App = () => {
   const [circleColor, setCircleColor] = useState('rgba(255, 0, 0, 0.7)');
   const [circleSize, setCircleSize] = useState(37);
   const [xMarkSize, setXMarkSize] = useState(30);
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  // const [showColorPicker, setShowColorPicker] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight - 56 });
   const [scale, setScale] = useState(1);
@@ -496,7 +496,59 @@ const App = () => {
         {/* Main Content */}
         <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
           <div className="drawing-container" style={{ height: '100%', width: '100%' }}>
-        <div style={{ maxWidth: '100%', maxHeight: '100%', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '100%', maxHeight: '100%', overflow: 'hidden', position: 'relative' }}>
+        {!image && (
+          <div className="placeholder-instructions" style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center',
+            color: '#888',
+            maxWidth: '500px',
+            padding: '2rem',
+            zIndex: 10,
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📷</div>
+            <h3 style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '1.5rem' }}>
+              Runescape Board Updater
+            </h3>
+            <p style={{ color: '#999', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+              Upload an image to start annotating your game board
+            </p>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '0.75rem',
+              textAlign: 'left',
+              background: '#2a2a2a',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              border: '1px solid #444'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
+                <span style={{ fontSize: '1.2rem' }}>1️</span>
+                <span>Click <strong style={{ color: '#dc2626' }}>Upload</strong> in the navbar to select your game board image</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
+                <span style={{ fontSize: '1.2rem' }}>2️</span>
+                <span>Choose a tool from the sidebar (Line, Circle, or X Mark)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
+                <span style={{ fontSize: '1.2rem' }}>3️</span>
+                <span>Customize colors and sizes using the sidebar controls</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
+                <span style={{ fontSize: '1.2rem' }}>4️</span>
+                <span>Draw or click on the canvas to add annotations</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
+                <span style={{ fontSize: '1.2rem' }}>5️</span>
+                <span>Use <strong style={{ color: '#dc2626' }}>Save</strong> or <strong style={{ color: '#dc2626' }}>Copy</strong> to download your annotated image locally or to your clipboard</span>
+              </div>
+            </div>
+          </div>
+        )}
         <Stage
             width={stageSize.width}
             height={stageSize.height}
