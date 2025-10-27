@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Stage, Layer, Line, Circle, Image as KonvaImage } from 'react-konva';
-import { Brush, Clear, Save, FileCopy, Image as ImageIcon, RadioButtonUnchecked, Close, Palette, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Brush, Clear, Save, FileCopy, Image as ImageIcon, RadioButtonUnchecked, Close, Palette, ChevronLeft, ChevronRight, Menu } from '@mui/icons-material';
 import './App.css';
 
 const App = () => {
@@ -12,18 +12,29 @@ const App = () => {
   const [circleColor, setCircleColor] = useState('rgba(255, 0, 0, 0.7)');
   const [circleSize, setCircleSize] = useState(37);
   const [xMarkSize, setXMarkSize] = useState(30);
-  // const [showColorPicker, setShowColorPicker] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight - 56 });
   const [scale, setScale] = useState(1);
   
   const stageRef = useRef(null); // Create ref for the Stage component
 
+  // Update mobile state on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Calculate stage size and scale when image or window changes
   useEffect(() => {
     const calculateSizeAndScale = () => {
       const navbarHeight = 56;
-      const sidebarWidth = sidebarOpen ? 280 : 0;
+      // On mobile, sidebar is full overlay, on desktop it takes space
+      const sidebarWidth = sidebarOpen && !isMobile ? 280 : 0;
       const maxWidth = window.innerWidth - sidebarWidth;
       const maxHeight = window.innerHeight - navbarHeight;
 
@@ -61,7 +72,7 @@ const App = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [image, sidebarOpen]);
+  }, [image, sidebarOpen, isMobile]);
 
   const handleToolChange = (newTool) => {
     setTool(newTool);
@@ -69,6 +80,11 @@ const App = () => {
 
   const handleMouseDown = (e) => {
     if (!image) return; // Disable drawing if no image is loaded
+  
+    // Prevent default to avoid scrolling on touch devices
+    if (e.evt && e.evt.cancelable) {
+      e.evt.preventDefault();
+    }
   
     const stage = e.target.getStage();
     const pos = stage.getPointerPosition();
@@ -108,6 +124,11 @@ const App = () => {
 
   const handleMouseMove = (e) => {
     if (!isDrawing || lines.length === 0 || !image) return; // Disable drawing if no image is loaded
+
+    // Prevent default to avoid scrolling on touch devices
+    if (e.evt && e.evt.cancelable) {
+      e.evt.preventDefault();
+    }
 
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
@@ -243,83 +264,83 @@ const App = () => {
     <div className="container-fluid">
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark" style={{ zIndex: 1000 }}>
         <a className="navbar-brand" href="/" style={{ fontSize: '1.25rem', lineHeight: '1.4', padding: '0.5rem 1rem' }}>Runescape Board <br /> Updater</a>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto">
-          <form className="d-flex">
-            <label htmlFor="icon-button-file" className="btn btn-outline-light me-2">
-              <ImageIcon /> Upload
-            </label> 
-            <input
-              accept="image/*"
-              style={{ display: 'none' }}
-              id="icon-button-file"
-              type="file"
-              onChange={handleImageUpload}
-            />
-          </form>
-          <li className="nav-item">
-            <button className="nav-link btn btn-link" onClick={saveCanvasAsImage}>
-              <Save /> Save
-            </button>
-          </li>
-          <li className="nav-item">
-            <button className="nav-link btn btn-link" onClick={copyToClipboard}>
-              <FileCopy /> Copy
-            </button>
-          </li>
-          <li className="nav-item">
-            <button className="nav-link btn btn-link" onClick={() => setLines([])}>
-              <Clear /> Clear
-            </button>
-          </li>        
-          </ul> 
+        <div className="d-flex align-items-center">
+          <label htmlFor="icon-button-file" className="btn btn-outline-light me-2" style={{ minWidth: 'auto' }}>
+            <ImageIcon /> <span className="d-none d-md-inline">Upload</span>
+          </label> 
+          <input
+            accept="image/*"
+            style={{ display: 'none' }}
+            id="icon-button-file"
+            type="file"
+            onChange={handleImageUpload}
+          />
         </div>
       </nav>
       
       <div style={{ display: 'flex', height: 'calc(100vh - 56px)', position: 'relative' }}>
         {/* Sidebar with Toggle Button */}
-        <div 
-          className="sidebar"
-          style={{
-            width: sidebarOpen ? '280px' : '0',
-            transition: 'width 0.3s ease',
-            overflow: 'visible',
-            backgroundColor: 'transparent',
-            borderRight: 'none',
-            position: 'relative',
-          }}
-        >
-          {/* Toggle Button - Only when sidebar is open */}
-          {sidebarOpen && (
-            <button
-              className="sidebar-toggle"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+        {isMobile ? (
+          /* Mobile Sidebar - Full Overlay */
+          <>
+            {sidebarOpen && (
+              <div 
+                className="mobile-sidebar-overlay"
+                onClick={() => setSidebarOpen(false)}
+                style={{
+                  position: 'fixed',
+                  top: '56px',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  zIndex: 999,
+                  animation: 'fadeIn 0.3s ease',
+                }}
+              />
+            )}
+            <div 
+              className="sidebar mobile-sidebar"
               style={{
-                position: 'absolute',
-                right: '-37px',
-                top: '10px',
-                zIndex: 1001,
-                border: '1px solid rgba(0,0,0,0.1)',
-                borderLeft: 'none',
-                backgroundColor: '#3a3a3a',
-                borderRadius: '0 8px 8px 0',
-                padding: '8px 6px',
-                cursor: 'pointer',
-                height: '40px',
-                minWidth: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                position: 'fixed',
+                top: '56px',
+                left: sidebarOpen ? '0' : '-100%',
+                height: 'calc(100vh - 56px)',
+                width: '280px',
+                transition: 'left 0.3s ease',
+                overflow: 'visible',
+                backgroundColor: 'transparent',
+                zIndex: 1000,
+                boxShadow: sidebarOpen ? '2px 0 20px rgba(0,0,0,0.5)' : 'none',
               }}
             >
-              <ChevronLeft style={{ color: '#dc2626' }} />
-            </button>
-          )}
-          
-          {sidebarOpen && (
+                {/* Close button for mobile */}
+              {sidebarOpen && (
+                <button
+                  className="sidebar-toggle"
+                  onClick={() => setSidebarOpen(false)}
+                  style={{
+                    position: 'absolute',
+                    right: '-50px',
+                    top: '10px',
+                    zIndex: 1001,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    backgroundColor: '#3a3a3a',
+                    borderRadius: '8px',
+                    padding: '8px 10px',
+                    cursor: 'pointer',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                  }}
+                >
+                  <Close style={{ fontSize: '20px' }} />
+                </button>
+              )}
+              
+              {sidebarOpen && (
             <div className="sidebar-content" style={{ 
               padding: '20px', 
               overflowY: 'auto', 
@@ -328,8 +349,37 @@ const App = () => {
               borderRadius: '0 12px 12px 0',
               boxShadow: '2px 0 16px rgba(0,0,0,0.3)',
             }}>
+              {/* Main Actions */}
+              <div className="mb-3">
+                <h6 className="mb-2" style={{ color: '#dc2626' }}>Actions</h6>
+                <div className="d-grid gap-2">
+                  <label htmlFor="sidebar-upload-file" className="btn btn-sm btn-outline-light">
+                    <ImageIcon /> Upload Image
+                  </label>
+                  <input
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    id="sidebar-upload-file"
+                    type="file"
+                    onChange={handleImageUpload}
+                  />
+                  <button className="btn btn-sm btn-outline-primary" onClick={saveCanvasAsImage}>
+                    <Save /> Save Image
+                  </button>
+                  <button className="btn btn-sm btn-outline-secondary" onClick={copyToClipboard}>
+                    <FileCopy /> Copy to Clipboard
+                  </button>
+                  <button className="btn btn-sm btn-outline-danger" onClick={() => setLines([])}>
+                    <Clear /> Clear All
+                  </button>
+                </div>
+              </div>
+              
+              <hr />
+              
               {/* Tool Tabs */}
               <div className="tool-tabs mb-3">
+                <h6 className="mb-2" style={{ color: '#dc2626' }}>Drawing Tools</h6>
                 <div className="btn-group w-100" role="group">
                   <button
                     type="button"
@@ -338,7 +388,7 @@ const App = () => {
                     title="Line Tool"
                   >
                     <Brush />
-                  </button>
+            </button>
             <button
                     type="button"
                     className={`btn btn-sm ${tool === 'circle' ? 'btn-primary' : 'btn-outline-secondary'}`}
@@ -446,27 +496,213 @@ const App = () => {
                   />
                 </div>
               )}
-              
-              <div className="mt-4 pt-3 border-top">
-                <h6 className="mb-2">Quick Actions</h6>
-                <div className="d-grid gap-2">
-                  <button className="btn btn-sm btn-outline-primary" onClick={saveCanvasAsImage}>
-                    <Save /> Save Image
-                  </button>
-                  <button className="btn btn-sm btn-outline-secondary" onClick={copyToClipboard}>
-                    <FileCopy /> Copy to Clipboard
-                  </button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => setLines([])}>
-                    <Clear /> Clear All
-            </button>
-                </div>
-              </div>
             </div>
           )}
-        </div>
+            </div>
+          </>
+        ) : (
+          /* Desktop Sidebar */
+          <div 
+            className="sidebar"
+            style={{
+              width: sidebarOpen ? '280px' : '0',
+              transition: 'width 0.3s ease',
+              overflow: 'visible',
+              backgroundColor: 'transparent',
+              borderRight: 'none',
+              position: 'relative',
+            }}
+          >
+            {/* Toggle Button - Only when sidebar is open */}
+            {sidebarOpen && (
+              <button
+                className="sidebar-toggle"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                style={{
+                  position: 'absolute',
+                  right: '-37px',
+                  top: '10px',
+                  zIndex: 1001,
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderLeft: 'none',
+                  backgroundColor: '#3a3a3a',
+                  borderRadius: '0 8px 8px 0',
+                  padding: '8px 6px',
+                  cursor: 'pointer',
+                  height: '40px',
+                  minWidth: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ChevronLeft style={{ color: '#dc2626' }} />
+              </button>
+            )}
+            
+            {sidebarOpen && (
+              <div className="sidebar-content" style={{ 
+                padding: '20px', 
+                overflowY: 'auto', 
+                maxHeight: 'calc(100vh - 56px)',
+                backgroundColor: '#3a3a3a',
+                borderRadius: '0 12px 12px 0',
+                boxShadow: '2px 0 16px rgba(0,0,0,0.3)',
+              }}>
+                {/* Main Actions */}
+                <div className="mb-3">
+                  <h6 className="mb-2" style={{ color: '#dc2626' }}>Actions</h6>
+                  <div className="d-grid gap-2">
+                    <label htmlFor="desktop-upload-file" className="btn btn-sm btn-outline-light">
+                      <ImageIcon /> Upload Image
+                    </label>
+                    <input
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      id="desktop-upload-file"
+                      type="file"
+                      onChange={handleImageUpload}
+                    />
+                    <button className="btn btn-sm btn-outline-primary" onClick={saveCanvasAsImage}>
+                      <Save /> Save Image
+                    </button>
+                    <button className="btn btn-sm btn-outline-secondary" onClick={copyToClipboard}>
+                      <FileCopy /> Copy to Clipboard
+                    </button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => setLines([])}>
+                      <Clear /> Clear All
+                    </button>
+                  </div>
+                </div>
+                
+                <hr />
+                
+                {/* Tool Tabs */}
+                <div className="tool-tabs mb-3">
+                  <h6 className="mb-2" style={{ color: '#dc2626' }}>Drawing Tools</h6>
+                  <div className="btn-group w-100" role="group">
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${tool === 'line' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => handleToolChange('line')}
+                      title="Line Tool"
+                    >
+                      <Brush />
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${tool === 'circle' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => handleToolChange('circle')}
+                      title="Circle Tool"
+                    >
+                      <RadioButtonUnchecked />
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${tool === 'x' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => handleToolChange('x')}
+                      title="X Mark Tool"
+                    >
+                      <Close />
+                    </button>
+                  </div>
+                </div>
+                
+                <hr />
+                
+                {/* Color Picker for Line and X */}
+                {(tool === 'line' || tool === 'x') && (
+                  <div>
+                    <label className="form-label mb-2"><Palette /> Line Color</label>
+                    <div className="d-flex align-items-center gap-2">
+                      <input 
+                        type="color" 
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        className="form-control form-control-color"
+                        style={{ width: '60px', height: '40px' }}
+                      />
+                      <span className="small">{color}</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Circle Controls */}
+                {tool === 'circle' && (
+                  <>
+                    <div className="mb-3">
+                      <label className="form-label mb-2"><Palette /> Circle Color:</label>
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        <input 
+                          type="color" 
+                          value={extractHexFromRgba(circleColor)}
+                          onChange={(e) => {
+                            const hex = e.target.value;
+                            const alpha = extractOpacityFromRgba(circleColor);
+                            setCircleColor(hexToRgba(hex, alpha));
+                          }}
+                          className="form-control form-control-color"
+                          style={{ width: '60px', height: '40px' }}
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label mb-2">Opacity: {Math.round(extractOpacityFromRgba(circleColor) * 100)}%</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={extractOpacityFromRgba(circleColor) * 100}
+                        onChange={(e) => {
+                          const alpha = parseFloat(e.target.value) / 100;
+                          const match = circleColor.match(/rgba?\(([^)]+)\)/);
+                          if (match) {
+                            const [, values] = match;
+                            const parts = values.split(',');
+                            const r = parseInt(parts[0].trim());
+                            const g = parseInt(parts[1].trim());
+                            const b = parseInt(parts[2].trim());
+                            setCircleColor(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+                          }
+                        }}
+                        className="form-range"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label mb-2">Size: {circleSize}px</label>
+                      <input
+                        type="range"
+                        min="10"
+                        max="100"
+                        value={circleSize}
+                        onChange={(e) => setCircleSize(parseInt(e.target.value))}
+                        className="form-range"
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {/* X Mark Size */}
+                {tool === 'x' && (
+                  <div className="mb-3">
+                    <label className="form-label mb-2">X Mark Size: {xMarkSize}px</label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="100"
+                      value={xMarkSize}
+                      onChange={(e) => setXMarkSize(parseInt(e.target.value))}
+                      className="form-range"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Toggle Button - Only when sidebar is closed */}
-        {!sidebarOpen && (
+        {!sidebarOpen && !isMobile && (
           <button
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -493,58 +729,75 @@ const App = () => {
           </button>
         )}
         
+        {/* Mobile Floating Action Button */}
+        {isMobile && !sidebarOpen && (
+          <button
+            className="mobile-fab"
+            onClick={() => setSidebarOpen(true)}
+            style={{
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              zIndex: 1000,
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              backgroundColor: '#dc2626',
+              color: 'white',
+              border: 'none',
+              boxShadow: '0 4px 16px rgba(220, 38, 38, 0.4)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              animation: 'fadeIn 0.3s ease',
+            }}
+            onTouchStart={(e) => {
+              e.currentTarget.style.transform = 'scale(0.95)';
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            <Menu style={{ fontSize: '32px' }} />
+          </button>
+        )}
+        
         {/* Main Content */}
         <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
           <div className="drawing-container" style={{ height: '100%', width: '100%' }}>
         <div style={{ maxWidth: '100%', maxHeight: '100%', overflow: 'hidden', position: 'relative' }}>
         {!image && (
-          <div className="placeholder-instructions" style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            textAlign: 'center',
-            color: '#888',
-            maxWidth: '500px',
-            padding: '2rem',
-            zIndex: 10,
-          }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📷</div>
-            <h3 style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '1.5rem' }}>
-              Runescape Board Updater
-            </h3>
-            <p style={{ color: '#999', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-              Upload an image to start annotating your game board
-            </p>
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '0.75rem',
-              textAlign: 'left',
-              background: '#2a2a2a',
-              padding: '1.5rem',
-              borderRadius: '12px',
-              border: '1px solid #444'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
-                <span style={{ fontSize: '1.2rem' }}>1️</span>
-                <span>Click <strong style={{ color: '#dc2626' }}>Upload</strong> in the navbar to select your game board image</span>
+          <div className="placeholder-instructions">
+            <div className="instruction-emoji">📷</div>
+            <h2 className="instruction-title">Runescape Board Updater</h2>
+            <p className="instruction-subtitle">Upload an image to start annotating</p>
+            
+            <div className="instruction-box">
+              <div className="instruction-card">
+                <div className="step-number">1</div>
+                <div className="step-text">Tap <strong>Upload Image</strong> in the sidebar</div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
-                <span style={{ fontSize: '1.2rem' }}>2️</span>
-                <span>Choose a tool from the sidebar (Line, Circle, or X Mark)</span>
+              
+              <div className="instruction-card">
+                <div className="step-number">2</div>
+                <div className="step-text">Choose your drawing tool</div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
-                <span style={{ fontSize: '1.2rem' }}>3️</span>
-                <span>Customize colors and sizes using the sidebar controls</span>
+              
+              <div className="instruction-card">
+                <div className="step-number">3</div>
+                <div className="step-text">Customize colors and sizes</div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
-                <span style={{ fontSize: '1.2rem' }}>4️</span>
-                <span>Draw or click on the canvas to add annotations</span>
+              
+              <div className="instruction-card">
+                <div className="step-number">4</div>
+                <div className="step-text">Draw on your image</div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#ccc' }}>
-                <span style={{ fontSize: '1.2rem' }}>5️</span>
-                <span>Use <strong style={{ color: '#dc2626' }}>Save</strong> or <strong style={{ color: '#dc2626' }}>Copy</strong> to download your annotated image locally or to your clipboard</span>
+              
+              <div className="instruction-card">
+                <div className="step-number">5</div>
+                <div className="step-text">Save or copy your work</div>
               </div>
             </div>
           </div>
@@ -557,6 +810,9 @@ const App = () => {
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
+          onTouchStart={handleMouseDown}
+          onTouchMove={handleMouseMove}
+          onTouchEnd={handleMouseUp}
           ref={stageRef}  // Attach the ref to the Stage
         >
           <Layer>

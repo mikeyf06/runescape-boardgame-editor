@@ -409,14 +409,267 @@ hr {
   font-weight: 500;
 }
 
-/* Responsive improvements */
+/* Sidebar Section Headers */
+.sidebar-content h6 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+/* Mobile Sidebar Overlay */
+.mobile-sidebar-overlay {
+  animation: fadeIn 0.3s ease;
+}
+
+.mobile-sidebar {
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Placeholder Instructions - Base Desktop Styles */
+.placeholder-instructions {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 90%;
+  max-width: 450px;
+  padding: 24px 28px;
+  z-index: 10;
+}
+
+.instruction-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.instruction-title {
+  font-size: 1.4rem;
+  color: #dc2626;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.instruction-subtitle {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 16px;
+  font-weight: 400;
+}
+
+.instruction-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.instruction-card {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.instruction-card:hover {
+  border-color: #dc2626;
+  transform: translateX(5px);
+}
+
+.step-number {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #dc2626;
+  background: #3a3a3a;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-size: 0.85rem;
+  color: #e5e5e5;
+  line-height: 1.4;
+  font-weight: 400;
+  flex: 1;
+  text-align: left;
+}
+
+.step-text strong {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .sidebar-content {
     font-size: 0.9rem;
+    padding: 1rem !important;
   }
   
   .form-label {
     font-size: 0.85rem;
+  }
+  
+  /* Make controls touch-friendly on mobile */
+  .btn-group .btn {
+    padding: 14px !important;
+    min-height: 48px;
+  }
+  
+  .form-control-color {
+    width: 70px !important;
+    height: 50px !important;
+  }
+  
+  .form-range {
+    height: 12px;
+  }
+  
+  .form-range::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .form-range::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Mobile navbar adjustments */
+  .navbar .btn, .navbar .nav-link {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.85rem;
+  }
+  
+  .navbar-brand {
+    padding: 0.5rem !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Touch-friendly buttons */
+  .d-grid .btn {
+    padding: 0.75rem !important;
+    font-size: 0.9rem;
+    min-height: 50px;
+  }
+  
+  /* Prevent text selection on touch */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Allow text selection in inputs */
+  input, textarea, select {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+  
+  /* Mobile drawing container */
+  .drawing-container > div {
+    margin: 10px !important;
+    border-radius: 8px;
+  }
+  
+  /* Mobile instruction overrides */
+  .placeholder-instructions {
+    width: 95%;
+    padding: 24px 20px;
+    max-width: none;
+  }
+  
+  .instruction-emoji {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+  
+  .instruction-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .instruction-subtitle {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .instruction-box {
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .instruction-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  
+  .step-number {
+    font-size: 1.2rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+  }
+  
+  .step-text {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  /* Disable hover effects on mobile */
+  .instruction-card:hover {
+    border-color: #3a3a3a;
+    transform: none;
+  }
+}
+
+/* Additional touch optimizations */
+@media (hover: none) {
+  .sidebar-toggle:hover {
+    transform: none;
+  }
+  
+  .btn:hover {
+    transform: none;
+  }
+  
+  .tool-tabs .btn:hover {
+    transform: none;
+  }
+  
+  .sidebar-content .btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .instruction-card:hover {
+    border-color: #3a3a3a;
+    transform: none;
+  }
+}
+
+/* Prevent overscroll bounce on mobile */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+  
+  .container-fluid {
+    overflow-x: hidden;
   }
 }
 
