@@ -389,8 +389,18 @@ hr {
 }
 
 /* Placeholder animation */
+@keyframes placeholderFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .drawing-container .placeholder-instructions {
-  animation: slideUp 0.5s ease-out;
+  will-change: opacity;
+  animation: placeholderFade 0.45s ease-out both;
 }
 
 /* Icon Styling */
@@ -430,12 +440,14 @@ hr {
 /* Placeholder Instructions - Base Desktop Styles */
 .placeholder-instructions {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(90%, 450px);
+  margin: auto;
   text-align: center;
-  width: 90%;
-  max-width: 450px;
   padding: 24px 28px;
   z-index: 10;
 }

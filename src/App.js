@@ -3,18 +3,43 @@ import { Stage, Layer, Line, Circle, Image as KonvaImage } from 'react-konva';
 import { Brush, Clear, Save, FileCopy, Image as ImageIcon, RadioButtonUnchecked, Close, Palette, ChevronLeft, ChevronRight, Menu } from '@mui/icons-material';
 import './App.css';
 
+const TOOL_PREFERENCES_KEY = 'rbg-tool-preferences';
+
+const loadToolPreferences = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  try {
+    const stored = window.localStorage.getItem(TOOL_PREFERENCES_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.warn('Failed to load tool preferences from localStorage:', error);
+    return null;
+  }
+};
+
 const App = () => {
-  const [tool, setTool] = useState('line');
+  const storedPreferencesRef = useRef(loadToolPreferences());
+
+  const [tool, setTool] = useState(() => storedPreferencesRef.current?.tool ?? 'line');
   const [lines, setLines] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [image, setImage] = useState(null);
-  const [color, setColor] = useState('#000000');
-  const [circleColor, setCircleColor] = useState('rgba(255, 0, 0, 0.7)');
-  const [circleSize, setCircleSize] = useState(37);
-  const [xMarkSize, setXMarkSize] = useState(30);
+  const [lineColor, setLineColor] = useState(() => storedPreferencesRef.current?.lineColor ?? storedPreferencesRef.current?.color ?? '#000000');
+  const [xColor, setXColor] = useState(() => storedPreferencesRef.current?.xColor ?? storedPreferencesRef.current?.color ?? '#dc2626');
+  const [circleColor, setCircleColor] = useState(() => storedPreferencesRef.current?.circleColor ?? 'rgba(255, 0, 0, 0.7)');
+  const [circleSize, setCircleSize] = useState(() => storedPreferencesRef.current?.circleSize ?? 37);
+  const [xMarkSize, setXMarkSize] = useState(() => storedPreferencesRef.current?.xMarkSize ?? 30);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [stageSize, setStageSize] = useState({ width: window.innerWidth, height: window.innerHeight - 56 });
+  const [stageSize, setStageSize] = useState(() => {
+    const navbarHeight = 56;
+    const initialSidebarWidth = window.innerWidth < 768 ? 0 : 280;
+    return {
+      width: Math.max(window.innerWidth - initialSidebarWidth, 0),
+      height: Math.max(window.innerHeight - navbarHeight, 0),
+    };
+  });
   const [scale, setScale] = useState(1);
   
   const stageRef = useRef(null); // Create ref for the Stage component
@@ -74,6 +99,26 @@ const App = () => {
     };
   }, [image, sidebarOpen, isMobile]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const preferencesToStore = {
+      tool,
+      lineColor,
+      xColor,
+      circleColor,
+      circleSize,
+      xMarkSize,
+    };
+    storedPreferencesRef.current = preferencesToStore;
+    try {
+      window.localStorage.setItem(TOOL_PREFERENCES_KEY, JSON.stringify(preferencesToStore));
+    } catch (error) {
+      console.warn('Failed to save tool preferences to localStorage:', error);
+    }
+  }, [tool, lineColor, xColor, circleColor, circleSize, xMarkSize]);
+
   const handleToolChange = (newTool) => {
     setTool(newTool);
   };
@@ -94,14 +139,14 @@ const App = () => {
     const y = pos.y / scale;
     
     if (tool === 'line') {
-      setLines([...lines, { points: [x, y], color, scale }]);
+      setLines([...lines, { points: [x, y], color: lineColor, scale }]);
     } else if (tool === 'x') {
       setLines([
         ...lines,
         {
           type: 'x',
           points: [x, y, xMarkSize],
-          color,
+          color: xColor,
           scale,
         },
       ]);
@@ -174,7 +219,7 @@ const App = () => {
     ctx.drawImage(image, 0, 0);
     
     // Draw all annotations scaled back to original image size
-    ctx.strokeStyle = color;
+    ctx.strokeStyle = lineColor;
     ctx.lineWidth = 8 / scale;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -188,7 +233,7 @@ const App = () => {
       } else if (line.type === 'x') {
         // Render X marks as two crossing diagonal lines
         const [x, y, size] = line.points;
-        ctx.strokeStyle = line.color || color;
+        ctx.strokeStyle = line.color || xColor;
         ctx.lineWidth = 8;
         
         // First diagonal line (top-left to bottom-right)
@@ -203,7 +248,7 @@ const App = () => {
         ctx.lineTo(x + size, y - size);
         ctx.stroke();
       } else {
-        ctx.strokeStyle = line.color || color;
+        ctx.strokeStyle = line.color || lineColor;
         ctx.beginPath();
         ctx.moveTo(line.points[0], line.points[1]);
         for (let i = 2; i < line.points.length; i += 2) {
@@ -410,19 +455,36 @@ const App = () => {
               
               <hr />
               
-              {/* Color Picker for Line and X */}
-              {(tool === 'line' || tool === 'x') && (
+              {/* Line Tool Color */}
+              {tool === 'line' && (
                 <div>
                   <label className="form-label mb-2"><Palette /> Line Color</label>
                   <div className="d-flex align-items-center gap-2">
                     <input 
                       type="color" 
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
+                      value={lineColor}
+                      onChange={(e) => setLineColor(e.target.value)}
                       className="form-control form-control-color"
                       style={{ width: '60px', height: '40px' }}
                     />
-                    <span className="small">{color}</span>
+                    <span className="small">{lineColor}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* X Tool Color */}
+              {tool === 'x' && (
+                <div>
+                  <label className="form-label mb-2"><Palette /> X Mark Color</label>
+                  <div className="d-flex align-items-center gap-2">
+                    <input 
+                      type="color" 
+                      value={xColor}
+                      onChange={(e) => setXColor(e.target.value)}
+                      className="form-control form-control-color"
+                      style={{ width: '60px', height: '40px' }}
+                    />
+                    <span className="small">{xColor}</span>
                   </div>
                 </div>
               )}
@@ -444,6 +506,7 @@ const App = () => {
                         className="form-control form-control-color"
                         style={{ width: '60px', height: '40px' }}
                       />
+                      <span className="small">{extractHexFromRgba(circleColor)}</span>
                     </div>
                   </div>
                   <div className="mb-3">
@@ -589,19 +652,36 @@ const App = () => {
                 
                 <hr />
                 
-                {/* Color Picker for Line and X */}
-                {(tool === 'line' || tool === 'x') && (
+                {/* Line Tool Color */}
+                {tool === 'line' && (
                   <div>
                     <label className="form-label mb-2"><Palette /> Line Color</label>
                     <div className="d-flex align-items-center gap-2">
                       <input 
                         type="color" 
-                        value={color}
-                        onChange={(e) => setColor(e.target.value)}
+                        value={lineColor}
+                        onChange={(e) => setLineColor(e.target.value)}
                         className="form-control form-control-color"
                         style={{ width: '60px', height: '40px' }}
                       />
-                      <span className="small">{color}</span>
+                      <span className="small">{lineColor}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* X Tool Color */}
+                {tool === 'x' && (
+                  <div>
+                    <label className="form-label mb-2"><Palette /> X Mark Color</label>
+                    <div className="d-flex align-items-center gap-2">
+                      <input 
+                        type="color" 
+                        value={xColor}
+                        onChange={(e) => setXColor(e.target.value)}
+                        className="form-control form-control-color"
+                        style={{ width: '60px', height: '40px' }}
+                      />
+                      <span className="small">{xColor}</span>
                     </div>
                   </div>
                 )}
@@ -623,6 +703,7 @@ const App = () => {
                           className="form-control form-control-color"
                           style={{ width: '60px', height: '40px' }}
                         />
+                      <span className="small">{extractHexFromRgba(circleColor)}</span>
                       </div>
                     </div>
                     <div className="mb-3">
